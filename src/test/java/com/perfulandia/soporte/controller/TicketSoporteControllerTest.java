@@ -282,4 +282,32 @@ class TicketSoporteControllerTest {
         mockMvc.perform(delete("/api/tickets/1"))
                 .andExpect(status().isNoContent());
     }
+
+
+    @Test
+     void listarPorUsuarioAsignado_deberiaRetornarTicketsAsignadosConHateoas() throws Exception {
+        Long idUsuarioAsignado = 50L;
+
+        TicketSoporte ticket = TicketSoporte.builder()
+            .idTicket(1L)
+            .idUsuario(10L)
+            .idUsuarioAsignado(idUsuarioAsignado)
+            .asunto("Problema con pedido")
+            .descripcion("El pedido no llegó")
+            .prioridad(PrioridadTicket.ALTA)
+            .estado(EstadoTicket.EN_REVISION)
+            .build();
+
+        when(ticketService.listarPorUsuarioAsignado(idUsuarioAsignado))
+                .thenReturn(List.of(ticket));
+
+        mockMvc.perform(get("/api/tickets/asignado/50"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$._embedded").exists())
+            .andExpect(jsonPath("$._links.self").exists())
+            .andExpect(jsonPath("$._links.todos-los-tickets").exists());
+}
+
+
+    
 }
